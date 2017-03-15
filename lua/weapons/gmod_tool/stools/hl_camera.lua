@@ -1,0 +1,54 @@
+AddCSLuaFile()
+local TOOL = TOOL	-- so we can TOOL within hooks and functions
+
+TOOL.Category = "Render"
+TOOL.Name = "#tool.hl_camera.name"
+
+TOOL.ClientConVar.key = 37
+TOOL.ClientConVar.toggle = 1
+TOOL.ClientConVar.fov = 0
+TOOL.ClientConVar.nearz = 0
+TOOL.ClientConVar.farz = 0
+TOOL.ClientConVar.roll = 0
+
+TOOL.Information = {
+	{ name = "left" }
+}
+
+function TOOL:LeftClick(tr)
+	if CLIENT then return true end
+
+	local ply = self:GetOwner()
+
+	local camera = ents.Create("hl_camera")
+	camera:SetCreator(ply)
+	camera:SetFOV(self:GetClientNumber("fov"))
+	camera:SetNearZ(self:GetClientNumber("nearz"))
+	camera:SetFarZ(self:GetClientNumber("farz"))
+	camera:SetRoll(self:GetClientNumber("roll"))
+
+	camera:SetPos(tr.StartPos)
+	camera:SetAngles(tr.Normal:Angle())
+	camera:Spawn()
+
+	camera:SetToggle(tobool(self:GetClientNumber("toggle")))
+	camera:SetKey(self:GetClientNumber("key"))
+
+	return true
+end
+
+function TOOL.BuildCPanel( CPanel )
+	CPanel:AddControl("numpad", {label = "#tool.hl_camera.key", command = "hl_camera_key"})
+	CPanel:CheckBox("#tool.toggle", "hl_camera_toggle")
+	CPanel:NumSlider("#tool.hl_camera.fov", "hl_camera_fov", 0, 179.99, 4)
+	CPanel:NumSlider("#tool.hl_camera.nearz", "hl_camera_nearz", 0, 1000000, 4)
+	CPanel:NumSlider("#tool.hl_camera.farz", "hl_camera_farz", 0, 1000000, 4)
+	CPanel:NumSlider("#tool.hl_camera.roll", "hl_camera_roll", -180, 180, 4)
+
+	-- reset button
+	local reset_cmd = ""
+	for k, v in pairs(TOOL.ClientConVar) do
+		reset_cmd = reset_cmd .. "hl_camera_" .. k .. " " .. v .. ";"
+	end
+	CPanel:AddControl("button", {label = "#tool.hl_camera.reset", command = reset_cmd})
+end
