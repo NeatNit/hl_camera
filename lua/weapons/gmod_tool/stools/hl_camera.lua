@@ -6,6 +6,7 @@ if CLIENT then
 	language.Add("tool.hl_camera.name","Advanced Camera")
 	language.Add("tool.hl_camera.reset","Reset Settings")
 	language.Add("tool.hl_camera.key","Activation Key")
+	language.Add("Undone_advanced_camera", "Undone Advanced Camera")
 end
 
 TOOL.Category = "Render"
@@ -35,11 +36,16 @@ function TOOL:LeftClick(tr)
 	camera:SetRoll(self:GetClientNumber("roll"))
 
 	camera:SetPos(tr.StartPos)
-	camera:SetAngles(tr.Normal:Angle())
+	camera:SetAngles(ply:EyeAngles())
 	camera:Spawn()
 	camera:Activate()
 
 	camera:SetPlayerKey(ply, self:GetClientNumber("key"), tobool(self:GetClientNumber("toggle")))
+
+	undo.Create("advanced_camera")
+		undo.AddEntity(camera)
+		undo.SetPlayer(ply)
+	undo.Finish()
 
 	return true
 end
