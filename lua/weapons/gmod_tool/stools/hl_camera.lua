@@ -1,10 +1,17 @@
 AddCSLuaFile()
 local TOOL = TOOL	-- so we can TOOL within hooks and functions
 
+if CLIENT then
+	-- custom language files are broken in addons! need to add them manually here until that's fixed... That also means no translations possible for now.
+	language.Add("tool.hl_camera.name","Advanced Camera")
+	language.Add("tool.hl_camera.reset","Reset Settings")
+	language.Add("tool.hl_camera.key","Activation Key")
+end
+
 TOOL.Category = "Render"
 TOOL.Name = "#tool.hl_camera.name"
 
-TOOL.ClientConVar.key = 37
+TOOL.ClientConVar.key = KEY_PAD_0
 TOOL.ClientConVar.toggle = 1
 TOOL.ClientConVar.fov = 0
 TOOL.ClientConVar.nearz = 0
@@ -30,9 +37,9 @@ function TOOL:LeftClick(tr)
 	camera:SetPos(tr.StartPos)
 	camera:SetAngles(tr.Normal:Angle())
 	camera:Spawn()
+	camera:Activate()
 
-	camera:SetToggle(tobool(self:GetClientNumber("toggle")))
-	camera:SetKey(self:GetClientNumber("key"))
+	camera:SetPlayerKey(ply, self:GetClientNumber("key"), tobool(self:GetClientNumber("toggle")))
 
 	return true
 end
@@ -40,10 +47,10 @@ end
 function TOOL.BuildCPanel( CPanel )
 	CPanel:AddControl("numpad", {label = "#tool.hl_camera.key", command = "hl_camera_key"})
 	CPanel:CheckBox("#tool.toggle", "hl_camera_toggle")
-	CPanel:NumSlider("#tool.hl_camera.fov", "hl_camera_fov", 0, 179.99, 4)
-	CPanel:NumSlider("#tool.hl_camera.nearz", "hl_camera_nearz", 0, 1000000, 4)
-	CPanel:NumSlider("#tool.hl_camera.farz", "hl_camera_farz", 0, 1000000, 4)
-	CPanel:NumSlider("#tool.hl_camera.roll", "hl_camera_roll", -180, 180, 4)
+	CPanel:NumSlider("#hl_camera.fov", "hl_camera_fov", 0, 179.99, 4)
+	CPanel:NumSlider("#hl_camera.nearz", "hl_camera_nearz", 0, 1000000, 4)
+	CPanel:NumSlider("#hl_camera.farz", "hl_camera_farz", 0, 1000000, 4)
+	CPanel:NumSlider("#hl_camera.roll", "hl_camera_roll", -180, 180, 4)
 
 	-- reset button
 	local reset_cmd = ""
