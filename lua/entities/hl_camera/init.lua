@@ -59,14 +59,17 @@ end
 
 -- register numpad functions
 numpad.Register("hl_camera_on", function(ply, camera)
+	if ply:IsDrivingEntity() then return end
 	if not IsValid(camera) then return false end
 	ply:SetViewEntity(camera)
 end)
 numpad.Register("hl_camera_off", function(ply, camera)
+	if ply:IsDrivingEntity() then return end
 	if not IsValid(camera) then return false end
 	if ply:GetViewEntity() == camera then ply:SetViewEntity(nil) end
 end)
 numpad.Register("hl_camera_toggle", function(ply, camera)
+	if ply:IsDrivingEntity() then return end
 	if not IsValid(camera) then return false end
 	if ply:GetViewEntity() == camera then
 		ply:SetViewEntity(nil)
@@ -176,7 +179,7 @@ function ENT:PostEntityPaste(ply)
 	elseif game.SinglePlayer() then
 		-- just loaded a save, try again in a second
 
-		--timer.Simple(1, function()	-- TEST: trying without a timer
+		timer.Simple(1, function()
 			for steamid, bind in pairs(self.DuplicatedBinds) do
 				ply = player.GetBySteamID(steamid)
 				if dev:GetBool() then MsgN("PostEntityPaste post-timer ", self, " ", steamid, " ", ply) end
@@ -189,7 +192,7 @@ function ENT:PostEntityPaste(ply)
 			end
 
 			self.DuplicatedBinds = nil
-		--end)
+		end)
 	else
 		self.DuplicatedBinds = nil
 	end
