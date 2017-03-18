@@ -42,6 +42,17 @@ function ENT:Initialize()
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 	end
 
+	-- Check in 1 second whether a key has been assigned to us. If not, ask the server what's going on!
+	if CLIENT then
+		timer.Simple(1, function()
+			if IsValid(self) and self.AssignedKey.key == nil then
+				net.Start("hl_camera_key")
+				net.WriteEntity(self)
+				net.SendToServer()
+			end
+		end)
+	end
+
 	self:SetGravity(0)
 
 	return BaseClass.Initialize(self)
@@ -76,7 +87,15 @@ if SERVER then
 	-- this is currently unused until I find a reason for the client to ask the server for a forced update
 	net.Receive("hl_camera_key", function(len, ply)
 		local camera = net.ReadEntity()
-		camera:UpdatePlayer(ply)
+
+		if len <= 16 then
+			camera:UpdatePlayer(ply)
+			return
+		end
+
+		local key = net.ReadInt(10)
+		local toggle = net.ReadBool()
+		camera:SetPlayerKey(ply, key, toggle)
 	end)
 
 
@@ -169,12 +188,14 @@ if SERVER then
 		self.PlayerBinds[steamid].impulse = {}
 		PlayerKeyCamera[steamid][key] = self
 
-		if toggle then
-			table.insert(self.PlayerBinds[steamid].impulse, numpad.OnDown(ply, key, "hl_camera_toggle", self))
-		else
-			table.insert(self.PlayerBinds[steamid].impulse, numpad.OnDown(ply, key, "hl_camera_on", self))
-			table.insert(self.PlayerBinds[steamid].impulse, numpad.OnUp(ply, key, "hl_camera_off", self))
-		end
+		timer.Simple(0.1, function()
+			if toggle then
+				table.insert(self.PlayerBinds[steamid].impulse, numpad.OnDown(ply, key, "hl_camera_toggle", self))
+			else
+				table.insert(self.PlayerBinds[steamid].impulse, numpad.OnDown(ply, key, "hl_camera_on", self))
+				table.insert(self.PlayerBinds[steamid].impulse, numpad.OnUp(ply, key, "hl_camera_off", self))
+			end
+		end)
 		self:UpdatePlayer(ply)
 	end
 end
@@ -194,23 +215,60 @@ function ENT:PhysicsUpdate(phys)
 end
 
 if CLIENT then
+	local trapping_camera
 	net.Receive("hl_camera_key", function(len)
-		-- when received on the client, we are being updated with a new key
+		-- we are being updated with a new key
 		local camera = net.ReadEntity()
+		if not IsValid(camera) or camera:GetClass() ~= ENT.ClassName then return end
+
 		camera.AssignedKey.key = net.ReadInt(10)
 		camera.AssignedKey.toggle = net.ReadBool()
 
-		local keyname = input.GetKeyName(camera.AssignedKey.key)
-		camera.AssignedKey.text = keyname and language.GetPhrase(keyname)
+		camera:UpdateText()
 	end)
 
+	function ENT:UpdateText()
+		local keyname = input.GetKeyName(self.AssignedKey.key)
+		self.AssignedKey.text = keyname and language.GetPhrase(keyname)
+	end
+
 	function ENT:GetText()
+		if trapping_camera == self then return "Press any key" end
 		return self.AssignedKey.text or "#hl_camera.unassigned"
 	end
 
+	function ENT:StartSetNewKey()
+		if IsValid(trapping_camera) then
+			trapping_camera:CancelSetNewKey()
+		end
+
+		trapping_camera = self
+		if not input.IsKeyTrapping() then input.StartKeyTrapping() end
+	end
+
+	function ENT:CancelSetNewKey()
+
+	end
+
 	function ENT:Think()
-		-- handle key trapping where applicable
-		-- if key is undefined then ask the server about it
+		if trapping_camera == self and input.IsKeyTrapping() then
+			local key = input.CheckKeyTrapping()
+			if key then
+				if key ~= KEY_ESCAPE then
+					net.Start("hl_camera_key")
+					net.WriteEntity(self)
+					net.WriteInt(key, 10)
+					net.WriteBool(self.AssignedKey.toggle)
+					net.SendToServer()
+
+					-- change the setting internally, just so the checkbox appears correct if you right-click very fast after toggling (i.e. before the server updated us)
+					self.AssignedKey.key = key
+					self:UpdateText()
+				end
+
+				trapping_camera = nil
+			end
+		end
 	end
 
 	function ENT:Draw()
@@ -233,19 +291,19 @@ if CLIENT then
 		-- obey cl_drawcameras that is used in vanilla cameras
 		if not cvars.Bool("cl_drawcameras", true) then return end
 
-		if not self.StartLookTime or LocalPlayer():GetEyeTrace().Entity ~= self then
+		if not self.StartLookTime or (LocalPlayer():GetEyeTrace().Entity ~= self and trapping_camera ~= self) then
 			self.StartLookTime = RealTime()
 			return
 		end
 
 		-- must be aiming at this camera for at least 0.7 second
-		if RealTime() < self.StartLookTime + 0.7 then return end
+		if trapping_camera ~= self and RealTime() < self.StartLookTime + 0.7 then return end
 
 		local screenpos = self:GetPos():ToScreen()
 		if not screenpos.visible then return end
 
 		cam.Start2D()
-			surface.SetFont("DermaDefault")
+			surface.SetFont("DermaDefaultBold")
 			local w, h = surface.GetTextSize(self:GetText())
 			screenpos.x = screenpos.x - (w / 2)
 			screenpos.y = screenpos.y - (h / 2)
@@ -295,23 +353,54 @@ if CLIENT then
 	end)
 end
 
--- add property to change assignment!
-local toggleprop = {
+-- add properties to change assignment
+local property
+
+-- Toggle checkbox
+property = {
 	Type = "toggle",
 	MenuLabel = "Toggle",
-	Order = 100,	-- I guess?
+	Order = 100000	-- I guess? it goes at the bottom anyway no matter what I put here :/
 }
 
-function toggleprop:Filter(ent)
-	return ent:GetClass() == ENT.ClassName
+function property:Filter(ent)
+	return IsValid(ent) and ent:GetClass() == ENT.ClassName
 end
 
-function toggleprop:Checked(camera)
-	return camera.AssignedKey and camera.AssignedKey.toggle or false
+function property:Checked(camera)
+	return camera.AssignedKey.toggle or false
 end
 
-function toggleprop:Action(ent)
+function property:Action(camera)
+	if not IsValid(camera) then return end
 
+	net.Start("hl_camera_key")
+	net.WriteEntity(camera)
+	net.WriteInt(camera.AssignedKey.key, 10)
+	net.WriteBool(not camera.AssignedKey.toggle)
+	net.SendToServer()
+
+	-- change the setting internally, just so the checkbox appears correct if you right-click very fast after toggling (i.e. before the server updated us)
+	camera.AssignedKey.toggle = not camera.AssignedKey.toggle
 end
 
-properties.Add( ENT.Folder .. "ToggleToggle", toggleprop)
+properties.Add( ENT.Folder .. "ToggleToggle", property)
+
+-- Reassign key
+property = {
+	MenuLabel = "Assign Key",
+	Order = 1,	-- should appear first
+	MenuIcon = "icon16/keyboard.png"
+}
+
+function property:Filter(ent)
+	return IsValid(ent) and ent:GetClass() == ENT.ClassName
+end
+
+function property:Action(camera)
+	if not IsValid(camera) then return end
+
+	camera:StartSetNewKey()
+end
+
+properties.Add( ENT.Folder .. "AssignKey", property)
