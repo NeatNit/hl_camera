@@ -6,7 +6,9 @@ language.Add("hl_camera.fov", "FOV")
 language.Add("hl_camera.roll", "Roll")
 language.Add("hl_camera.nearz", "Near Z")
 language.Add("hl_camera.farz", "Far Z")
+language.Add("hl_camera.unassign", "Unassign key")
 language.Add("hl_camera.unassigned", "Unassigned")
+language.Add("hl_camera.assign", "Assign key")
 
 -- for the stool
 language.Add("tool.hl_camera.name", "Advanced Camera")

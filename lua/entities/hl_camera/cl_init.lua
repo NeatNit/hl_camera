@@ -27,16 +27,8 @@ function ENT:GetText()
 end
 
 function ENT:StartSetNewKey()
-	if IsValid(trapping_camera) then
-		trapping_camera:CancelSetNewKey()
-	end
-
 	trapping_camera = self
 	if not input.IsKeyTrapping() then input.StartKeyTrapping() end
-end
-
-function ENT:CancelSetNewKey()
-
 end
 
 function ENT:Think()

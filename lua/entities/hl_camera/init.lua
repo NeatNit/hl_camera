@@ -10,6 +10,16 @@ local ENT = ENT	-- so we can use ENT within hooks and functions
 local dev = GetConVar("developer")
 DEFINE_BASECLASS(ENT.Base)
 
+
+-- lookup table for each player's assigned camera for a certain key
+-- saved globally to stop glitches during development
+HL_CAMERA_PKC = HL_CAMERA_PKC or {}
+local PlayerKeyCamera = HL_CAMERA_PKC
+
+-- internal flag to make SetPlayerKey not call UpdatePlayer
+local DO_NOT_SEND = false
+
+
 -- The client is either probing us because it doesn't know which key is assigned to the camera
 -- or it's telling us that it wants to assign a new key (or change the toggle setting)
 net.Receive("hl_camera_key", function(len, ply)
@@ -26,7 +36,6 @@ net.Receive("hl_camera_key", function(len, ply)
 end)
 
 
--- Send the
 function ENT:UpdatePlayer(ply)
 	-- gotta give it a small delay, otherwise the net message is sent too early
 	-- and received before the client has initialized the entity
@@ -38,7 +47,7 @@ function ENT:UpdatePlayer(ply)
 		local steamid = ply:SteamID()
 		if not self.PlayerBinds[steamid] then
 			net.WriteInt(KEY_NONE, 10)
-			net.WriteBool(false)
+			net.WriteBool(true)
 		else
 			net.WriteInt(self.PlayerBinds[steamid].key, 10)
 			net.WriteBool(self.PlayerBinds[steamid].toggle)
@@ -46,6 +55,7 @@ function ENT:UpdatePlayer(ply)
 		net.Send(ply)
 	end)
 end
+
 
 -- register numpad functions
 numpad.Register("hl_camera_on", function(ply, camera)
@@ -65,13 +75,9 @@ numpad.Register("hl_camera_toggle", function(ply, camera)
 	end
 end)
 
--- lookup table for each player's assigned camera for a certain key
--- saved globally to stop glitches during development
-HL_CAMERA_PKC = HL_CAMERA_PKC or {}
-local PlayerKeyCamera = HL_CAMERA_PKC
 
 function ENT:SetPlayerKey(ply, key, toggle)
-	steamid = ply:SteamID()	-- get player's SteamID
+	local steamid = ply:SteamID()	-- get player's SteamID
 
 	-- remove the existing bind for this player for this camera, if one exists
 	if self.PlayerBinds[steamid] then
@@ -95,7 +101,7 @@ function ENT:SetPlayerKey(ply, key, toggle)
 		-- make sure player isn't stuck viewing through us
 		if ply:GetViewEntity() == self then ply:SetViewEntity(nil) end
 
-		self:UpdatePlayer(ply)
+		if not DO_NOT_SEND then self:UpdatePlayer(ply) end
 		return
 	end
 
@@ -123,8 +129,10 @@ function ENT:SetPlayerKey(ply, key, toggle)
 			table.insert(self.PlayerBinds[steamid].impulse, numpad.OnUp(ply, key, "hl_camera_off", self))
 		end
 	end)
-	self:UpdatePlayer(ply)
+
+	if not DO_NOT_SEND then self:UpdatePlayer(ply) end
 end
+
 
 function ENT:OnRemove()
 	for _, ply in pairs(player.GetAll()) do
@@ -134,10 +142,55 @@ function ENT:OnRemove()
 	end
 end
 
+
 function ENT:PhysicsUpdate(phys)
 	-- If we're not being held by the physgun, we should be frozen.
 	if not self:IsPlayerHolding() then
 		phys:EnableMotion(false)
 		phys:Sleep()
+	end
+end
+
+
+function ENT:OnDuplicated(dupdata)
+	if dev:GetBool() then MsgN("OnDuplicated ", self) end
+
+	self.PlayerBinds = {}	-- don't actually want to inherit the player binds table
+
+	self.DuplicatedBinds = dupdata.PlayerBinds -- this is for PostEntityPaste
+end
+
+
+function ENT:PostEntityPaste(ply)
+	if dev:GetBool() then MsgN("PostEntityPaste ", self, ply) end
+
+	if IsValid(ply) then
+		local steamid = ply:SteamID()
+		if self.DuplicatedBinds[steamid] then
+			self:SetPlayerKey(ply,
+				self.DuplicatedBinds[steamid].key,
+				self.DuplicatedBinds[steamid].toggle)
+		end
+
+		self.DuplicatedBinds = nil
+	elseif game.SinglePlayer() then
+		-- just loaded a save, try again in a second
+
+		--timer.Simple(1, function()	-- TEST: trying without a timer
+			for steamid, bind in pairs(self.DuplicatedBinds) do
+				ply = player.GetBySteamID(steamid)
+				if dev:GetBool() then MsgN("PostEntityPaste post-timer ", self, " ", steamid, " ", ply) end
+				if IsValid(ply) then
+					-- set the player's key but don't send it to the client - they're probably not connected.
+					DO_NOT_SEND = true
+					self:SetPlayerKey(ply, bind.key, bind.toggle)
+					DO_NOT_SEND = false
+				end
+			end
+
+			self.DuplicatedBinds = nil
+		--end)
+	else
+		self.DuplicatedBinds = nil
 	end
 end
