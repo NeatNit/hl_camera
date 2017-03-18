@@ -1,5 +1,9 @@
 {
 	"title"		:	"Advanced Camera Tool",
 	"type"		:	"tool",
-	"tags"		:	[ "build" ]
+	"tags"		:	[ "build" ],
+	"ignore"	:
+	[
+		".git/*"
+	]
 }
