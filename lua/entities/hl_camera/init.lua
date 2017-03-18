@@ -1,5 +1,7 @@
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("language.lua")
+AddCSLuaFile("properties.lua")
+
 include("shared.lua")
 
 util.AddNetworkString("hl_camera_key")

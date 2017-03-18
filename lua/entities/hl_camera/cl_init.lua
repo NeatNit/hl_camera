@@ -1,8 +1,8 @@
 include("shared.lua")
 include("language.lua")
+include("properties.lua")
 
 local ENT = ENT	-- so we can use ENT within hooks and functions
-local dev = GetConVar("developer")
 
 local trapping_camera
 net.Receive("hl_camera_key", function(len)
