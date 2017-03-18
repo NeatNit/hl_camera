@@ -11,15 +11,6 @@ ENT.Base = "base_anim"
 DEFINE_BASECLASS(ENT.Base)
 ENT.RenderGroup = RENDERGROUP_BOTH
 
-if CLIENT then
-	-- custom language files are broken in addons! need to add them manually here until that's fixed... That also means no translations possible for now.
-	language.Add("hl_camera.fov", "FOV")
-	language.Add("hl_camera.roll", "Roll")
-	language.Add("hl_camera.nearz", "Near Z")
-	language.Add("hl_camera.farz", "Far Z")
-	language.Add("hl_camera.unassigned", "Unassigned")
-end
-
 function ENT:SetupDataTables()
 	if dev:GetBool() then MsgN("SetupDataTables ", self) end
 	self:NetworkVar("Float", 0, "FOV", { KeyName = "fov", Edit = { title = "#hl_camera.fov", type = "Float", order = 0, min = 0, max = 179.99 } } )
