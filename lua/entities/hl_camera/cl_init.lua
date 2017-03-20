@@ -1,14 +1,14 @@
 include("shared.lua")
-include("language.lua")
-include("properties.lua")
+include("cl_language.lua")
+include("cl_properties.lua")
 
 local ENT = ENT	-- so we can use ENT within hooks and functions
-
 local trapping_camera
+
 net.Receive("hl_camera_key", function(len)
 	-- we are being updated with a new key
 	local camera = net.ReadEntity()
-	if not IsValid(camera) or camera:GetClass() ~= ENT.ClassName then return end
+	if not IsValid(camera) or camera:GetClass() ~= ENT.ClassName or not camera.AssignedKey then return end
 
 	camera.AssignedKey.key = net.ReadInt(10)
 	camera.AssignedKey.toggle = net.ReadBool()
@@ -22,7 +22,7 @@ function ENT:UpdateText()
 end
 
 function ENT:GetText()
-	if trapping_camera == self then return "Press any key" end
+	if trapping_camera == self then return "#hl_camera.assign.instruction" end
 	return self.AssignedKey.text or "#hl_camera.unassigned"
 end
 
@@ -72,12 +72,13 @@ function ENT:DrawTranslucent()
 	-- obey cl_drawcameras that is used in vanilla cameras
 	if not cvars.Bool("cl_drawcameras", true) then return end
 
-	if not self.StartLookTime or (LocalPlayer():GetEyeTrace().Entity ~= self and trapping_camera ~= self) then
+	-- keep track of the last time the player wasn't looking directly at us
+	if LocalPlayer():GetEyeTrace().Entity ~= self or not self.StartLookTime then
 		self.StartLookTime = RealTime()
-		return
 	end
 
-	-- must be aiming at this camera for at least 0.7 second
+	-- must be aiming at this camera for at least some time
+	-- always draw label if we are trapping
 	if trapping_camera ~= self and RealTime() < self.StartLookTime + 0.7 then return end
 
 	local screenpos = self:GetPos():ToScreen()

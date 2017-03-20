@@ -1,8 +1,10 @@
 local ENT = ENT	-- so we can use ENT within hooks and functions
-
 local property
 
+
 -- Toggle checkbox
+-- ===============
+
 property = {
 	Type = "toggle",
 	MenuLabel = "#tool.toggle",
@@ -33,7 +35,11 @@ end
 
 properties.Add( "hl_camera_toggle", property)
 
+
+
 -- Assign key
+-- ==========
+
 property = {
 	MenuLabel = "#hl_camera.assign",
 	Order = 100200,	-- should appear first
@@ -53,7 +59,11 @@ end
 
 properties.Add( "hl_camera_assign", property)
 
+
+
 -- Unassign key
+-- ============
+
 property = {
 	MenuLabel = "#hl_camera.unassign",
 	Order = 100201,	-- should appear first

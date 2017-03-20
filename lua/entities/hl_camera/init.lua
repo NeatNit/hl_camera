@@ -1,6 +1,6 @@
 AddCSLuaFile("cl_init.lua")
-AddCSLuaFile("language.lua")
-AddCSLuaFile("properties.lua")
+AddCSLuaFile("cl_language.lua")
+AddCSLuaFile("cl_properties.lua")
 
 include("shared.lua")
 
@@ -15,10 +15,6 @@ DEFINE_BASECLASS(ENT.Base)
 -- saved globally to stop glitches during development
 HL_CAMERA_PKC = HL_CAMERA_PKC or {}
 local PlayerKeyCamera = HL_CAMERA_PKC
-
--- internal flag to make SetPlayerKey not call UpdatePlayer
-local DO_NOT_SEND = false
-
 
 -- The client is either probing us because it doesn't know which key is assigned to the camera
 -- or it's telling us that it wants to assign a new key (or change the toggle setting)
@@ -37,23 +33,18 @@ end)
 
 
 function ENT:UpdatePlayer(ply)
-	-- gotta give it a small delay, otherwise the net message is sent too early
-	-- and received before the client has initialized the entity
-	-- (in the case of calling this method immediately after spawning)
-	timer.Simple(0.1, function()
-		net.Start("hl_camera_key")
-		net.WriteEntity(self)
+	net.Start("hl_camera_key")
+	net.WriteEntity(self)
 
-		local steamid = ply:SteamID()
-		if not self.PlayerBinds[steamid] then
-			net.WriteInt(KEY_NONE, 10)
-			net.WriteBool(true)
-		else
-			net.WriteInt(self.PlayerBinds[steamid].key, 10)
-			net.WriteBool(self.PlayerBinds[steamid].toggle)
-		end
-		net.Send(ply)
-	end)
+	local steamid = ply:SteamID()
+	if not self.PlayerBinds[steamid] then
+		net.WriteInt(KEY_NONE, 10)
+		net.WriteBool(true)
+	else
+		net.WriteInt(self.PlayerBinds[steamid].key, 10)
+		net.WriteBool(self.PlayerBinds[steamid].toggle)
+	end
+	net.Send(ply)
 end
 
 
@@ -104,7 +95,7 @@ function ENT:SetPlayerKey(ply, key, toggle)
 		-- make sure player isn't stuck viewing through us
 		if ply:GetViewEntity() == self then ply:SetViewEntity(nil) end
 
-		if not DO_NOT_SEND then self:UpdatePlayer(ply) end
+		self:UpdatePlayer(ply)
 		return
 	end
 
@@ -133,7 +124,7 @@ function ENT:SetPlayerKey(ply, key, toggle)
 		end
 	end)
 
-	if not DO_NOT_SEND then self:UpdatePlayer(ply) end
+	self:UpdatePlayer(ply)
 end
 
 
@@ -184,10 +175,7 @@ function ENT:PostEntityPaste(ply)
 				ply = player.GetBySteamID(steamid)
 				if dev:GetBool() then MsgN("PostEntityPaste post-timer ", self, " ", steamid, " ", ply) end
 				if IsValid(ply) then
-					-- set the player's key but don't send it to the client - they're probably not connected.
-					DO_NOT_SEND = true
 					self:SetPlayerKey(ply, bind.key, bind.toggle)
-					DO_NOT_SEND = false
 				end
 			end
 

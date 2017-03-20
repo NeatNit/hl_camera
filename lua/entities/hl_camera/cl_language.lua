@@ -9,6 +9,7 @@ language.Add("hl_camera.farz", "Far Z")
 language.Add("hl_camera.unassign", "Unassign key")
 language.Add("hl_camera.unassigned", "Unassigned")
 language.Add("hl_camera.assign", "Assign key")
+language.Add("hl_camera.assign.instruction", "Press any key")
 
 -- for the stool
 language.Add("tool.hl_camera.name", "Advanced Camera")
