@@ -3,6 +3,7 @@ AddCSLuaFile("cl_language.lua")
 AddCSLuaFile("cl_properties.lua")
 
 include("shared.lua")
+include("projection.lua")
 
 util.AddNetworkString("hl_camera_key")
 
