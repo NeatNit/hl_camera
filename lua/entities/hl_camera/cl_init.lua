@@ -1,6 +1,7 @@
 include("shared.lua")
 include("cl_language.lua")
 include("cl_properties.lua")
+include("projection_enum.lua")
 
 local ENT = ENT	-- so we can use ENT within hooks and functions
 local trapping_camera
