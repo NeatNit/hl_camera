@@ -1,6 +1,7 @@
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("cl_language.lua")
 AddCSLuaFile("cl_properties.lua")
+resource.AddWorkshop("881605937")
 
 include("shared.lua")
 include("projection.lua")

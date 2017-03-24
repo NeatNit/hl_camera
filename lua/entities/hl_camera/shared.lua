@@ -97,7 +97,7 @@ function ENT:SetupDataTables()
 			category = "#hl_camera.projection.title",
 			type = "Float",
 			min = 0,
-			max = 10
+			max = 300
 		}
 	})
 
@@ -133,7 +133,7 @@ function ENT:Initialize()
 	self:DrawShadow(false)
 
 	-- defaults
-	self:SetProjectionColor(Vector(1, 1, 0))
+	self:SetProjectionColor(Vector(0, 1, 0))
 	self:SetProjectionBrightness(1)
 
 	-- Tell the server that we are ready to receive the key of this camera
