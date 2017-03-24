@@ -2,12 +2,19 @@
 -- need to add them manually here until that's fixed.
 -- That also means no multilingual translations possible for now.
 
+-- Main network vars
 language.Add("hl_camera.fov", "FOV")
 language.Add("hl_camera.roll", "Roll")
 language.Add("hl_camera.nearz", "Near Z")
 language.Add("hl_camera.farz", "Far Z")
-language.Add("hl_camera.projectionon", "Enable Projection")
-language.Add("hl_camera.projectionratio", "Projection Aspect Ratio")
+
+-- Projection network vars
+language.Add("hl_camera.projection.on", "Enable Projection")
+language.Add("hl_camera.projection.ratio", "Projection Aspect Ratio")
+language.Add("hl_camera.projection.color", "Color")
+language.Add("hl_camera.projection.brightness", "Brightness")
+
+-- Properties
 language.Add("hl_camera.unassign", "Unassign key")
 language.Add("hl_camera.unassigned", "Unassigned")
 language.Add("hl_camera.assign", "Assign key")

@@ -60,7 +60,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Bool", 0, "ProjectionOn", {
 		KeyName = "projectionon",
 		Edit = {
-			title = "#hl_camera.projectionon",
+			title = "#hl_camera.projection.on",
 			order = 4,
 			category = "Projection",
 			type = "Boolean"
@@ -70,7 +70,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Int", 0, "ProjectionRatioID", {
 		KeyName = "projectionratioid",
 		Edit = {
-			title = "#hl_camera.projectionratio",
+			title = "#hl_camera.projection.ratio",
 			order = 5,
 			category = "Projection",
 			type = "Combo",
@@ -79,10 +79,34 @@ function ENT:SetupDataTables()
 		}
 	})
 
+	self:NetworkVar("Vector", 0, "ProjectionColor", {
+		KeyName = "projectioncolor",
+		Edit = {
+			title = "#hl_camera.projection.color",
+			order = 5,
+			category = "Projection",
+			type = "VectorColor"
+		}
+	})
+
+	self:NetworkVar("Float", 4, "ProjectionBrightness", {
+		KeyName = "projectionbr",
+		Edit = {
+			title = "#hl_camera.projection.brightness",
+			order = 7,
+			category = "Projection",
+			type = "Float",
+			min = 0,
+			max = 10
+		}
+	})
+
 	-- initialize our required table and on the server, register projected texture hooks
 	if SERVER then
 		self.PlayerBinds = {}
+		self:NetworkVarNotify("ProjectionBrightness", self.UpdateProjectionVar)
 		self:NetworkVarNotify("ProjectionRatioID", self.UpdateProjectionVar)
+		self:NetworkVarNotify("ProjectionColor", self.UpdateProjectionVar)
 		self:NetworkVarNotify("ProjectionOn", self.UpdateProjectionVar)
 		self:NetworkVarNotify("NearZ", self.UpdateProjectionVar)
 		self:NetworkVarNotify("FarZ", self.UpdateProjectionVar)
@@ -107,6 +131,10 @@ function ENT:Initialize()
 
 	self:SetGravity(0)
 	self:DrawShadow(false)
+
+	-- defaults
+	self:SetProjectionColor(Vector(1, 1, 0))
+	self:SetProjectionBrightness(1)
 
 	-- Tell the server that we are ready to receive the key of this camera
 	if CLIENT and IsValid(self) and self.AssignedKey.key == nil then

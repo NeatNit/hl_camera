@@ -15,9 +15,21 @@ function ENT:UpdateProjectionVar(varchanged, oldvalue, newvalue)
 		self:UpdateProjectionFarZ(newvalue)
 	elseif varchanged == "Roll" then
 		self:UpdateProjectionRoll(newvalue)
-	elseif varchanged == "FOV" then
-		self:UpdateProjectionFOV(newvalue, self:GetProjectionRatioID(), oldvalue)
+	elseif varchanged == "ProjectionColor" then
+		self:UpdateProjectionColor(newvalue, self:GetProjectionBrightness())
+	elseif varchanged == "ProjectionBrightness" then
+		self:UpdateProjectionColor(self:GetProjectionColor(), newvalue)
 	end
+end
+
+function ENT:UpdateProjectionColor(newcolor, newbrightness)
+	if not IsValid(self.ptexture) then return end
+
+	local r = newcolor.x * newbrightness * 255
+	local g = newcolor.y * newbrightness * 255
+	local b = newcolor.z * newbrightness * 255
+
+	self.ptexture:SetKeyValue("lightcolor", Format( "%i %i %i 255", r, g, b))
 end
 
 function ENT:UpdateProjectionTexture(newratioid, fov)
@@ -40,10 +52,11 @@ function ENT:UpdateProjectionNearZ(newnearz)
 	self.ptexture:SetKeyValue("nearz", newnearz)
 end
 
+local defaultfarz = 16384 * math.sqrt(3)	-- 16384 is r_mapextents's default value and r_mapextents is multiplied by the square root of 3 in the fallback farz
 function ENT:UpdateProjectionFarZ(newfarz)
 	if not IsValid(self.ptexture) then return end
 	if newfarz <= 0 then
-		newfarz = 100000	-- whatever
+		newfarz = defaultfarz
 	end
 	self.ptexture:SetKeyValue("farz", newfarz)
 end
@@ -56,7 +69,6 @@ end
 function ENT:SwitchProjection(on)
 	if not on and IsValid(self.ptexture) then
 		-- Turning projection off
-		print("Turning projection off")
 		self.ptexture:Remove()
 		self.ptexture = nil
 		return
@@ -68,13 +80,9 @@ function ENT:SwitchProjection(on)
 		self:DeleteOnRemove(self.ptexture)
 		self.ptexture:SetLocalPos(Vector(0, 0, 0))
 		self.ptexture:SetKeyValue("enableshadows", 1)
-		self.ptexture:SetKeyValue("lightcolor", Format( "%i %i %i 255", 255, 255, 0))
 		self.ptexture:Spawn()
-		print(self.ptexture)
 
-		-- self.ptexture:SetLocalAngles(Angle(0, 0, self:GetRoll()))
-		-- self.ptexture:SetKeyValue("nearz", self:GetNearZ())
-		-- self.ptexture:SetKeyValue("farz", self:GetFarZ())
+		self:UpdateProjectionColor(self:GetProjectionColor(), self:GetProjectionBrightness())
 		self:UpdateProjectionTexture(self:GetProjectionRatioID())
 		self:UpdateProjectionFOV(self:GetFOV(), self:GetProjectionRatioID())
 		self:UpdateProjectionNearZ(self:GetNearZ())
