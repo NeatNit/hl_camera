@@ -62,7 +62,7 @@ function ENT:SetupDataTables()
 		Edit = {
 			title = "#hl_camera.projection.on",
 			order = 4,
-			category = "Projection",
+			category = "#hl_camera.projection.title",
 			type = "Boolean"
 		}
 	})
@@ -72,7 +72,7 @@ function ENT:SetupDataTables()
 		Edit = {
 			title = "#hl_camera.projection.ratio",
 			order = 5,
-			category = "Projection",
+			category = "#hl_camera.projection.title",
 			type = "Combo",
 			--text = "16:9",
 			values = self.ProjectionRatioValues	-- see projection_enum.lua
@@ -84,7 +84,7 @@ function ENT:SetupDataTables()
 		Edit = {
 			title = "#hl_camera.projection.color",
 			order = 5,
-			category = "Projection",
+			category = "#hl_camera.projection.title",
 			type = "VectorColor"
 		}
 	})
@@ -94,7 +94,7 @@ function ENT:SetupDataTables()
 		Edit = {
 			title = "#hl_camera.projection.brightness",
 			order = 7,
-			category = "Projection",
+			category = "#hl_camera.projection.title",
 			type = "Float",
 			min = 0,
 			max = 10

@@ -9,6 +9,7 @@ language.Add("hl_camera.nearz", "Near Z")
 language.Add("hl_camera.farz", "Far Z")
 
 -- Projection network vars
+language.Add("hl_camera.projection.title", "Line-of-Sight Projection")
 language.Add("hl_camera.projection.on", "Enable Projection")
 language.Add("hl_camera.projection.ratio", "Projection Aspect Ratio")
 language.Add("hl_camera.projection.color", "Color")
