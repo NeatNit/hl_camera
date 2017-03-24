@@ -15,6 +15,8 @@ function ENT:UpdateProjectionVar(varchanged, oldvalue, newvalue)
 		self:UpdateProjectionFarZ(newvalue)
 	elseif varchanged == "Roll" then
 		self:UpdateProjectionRoll(newvalue)
+	elseif varchanged == "FOV" then
+		self:UpdateProjectionFOV(newvalue, self:GetProjectionRatioID(), oldvalue)
 	elseif varchanged == "ProjectionColor" then
 		self:UpdateProjectionColor(newvalue, self:GetProjectionBrightness())
 	elseif varchanged == "ProjectionBrightness" then
