@@ -13,11 +13,20 @@ DEFINE_BASECLASS(ENT.Base)
 ENT.RenderGroup = RENDERGROUP_BOTH
 
 function ENT:SetupDataTables()
+	self:NetworkVar("Vector", 0, "ViewOffset", {
+		KeyName = "viewoffset",
+		Edit = {
+			title = "#hl_camera.viewoffset",
+			order = 0,
+			type = "Generic"
+		}
+	})
+
 	self:NetworkVar("Float", 0, "FOV", {
 		KeyName = "fov",
 		Edit = {
 			title = "#hl_camera.fov",
-			order = 0,
+			order = 1,
 			type = "Float",
 			min = 0,
 			max = 179.99
@@ -28,7 +37,7 @@ function ENT:SetupDataTables()
 		KeyName = "nearz",
 		Edit = {
 			title = "#hl_camera.nearz",
-			order = 1,
+			order = 2,
 			type = "Float",
 			min = 0,
 			max = 1000000
@@ -39,7 +48,7 @@ function ENT:SetupDataTables()
 		KeyName = "farz",
 		Edit = {
 			title = "#hl_camera.farz",
-			order = 2,
+			order = 3,
 			type = "Float",
 			min = 0,
 			max = 1000000
@@ -50,7 +59,7 @@ function ENT:SetupDataTables()
 		KeyName = "roll",
 		Edit = {
 			title = "#hl_camera.roll",
-			order = 3,
+			order = 4,
 			type = "Float",
 			min = -180,
 			max = 180
@@ -61,7 +70,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionon",
 		Edit = {
 			title = "#hl_camera.projection.on",
-			order = 4,
+			order = 5,
 			category = "#hl_camera.projection.title",
 			type = "Boolean"
 		}
@@ -71,7 +80,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionratioid",
 		Edit = {
 			title = "#hl_camera.projection.ratio",
-			order = 5,
+			order = 6,
 			category = "#hl_camera.projection.title",
 			type = "Combo",
 			--text = "16:9",
@@ -79,11 +88,11 @@ function ENT:SetupDataTables()
 		}
 	})
 
-	self:NetworkVar("Vector", 0, "ProjectionColor", {
+	self:NetworkVar("Vector", 1, "ProjectionColor", {
 		KeyName = "projectioncolor",
 		Edit = {
 			title = "#hl_camera.projection.color",
-			order = 5,
+			order = 7,
 			category = "#hl_camera.projection.title",
 			type = "VectorColor"
 		}
@@ -93,7 +102,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionbr",
 		Edit = {
 			title = "#hl_camera.projection.brightness",
-			order = 7,
+			order = 8,
 			category = "#hl_camera.projection.title",
 			type = "Float",
 			min = 0,
@@ -112,6 +121,7 @@ function ENT:SetupDataTables()
 		self:NetworkVarNotify("FarZ", self.UpdateProjectionVar)
 		self:NetworkVarNotify("Roll", self.UpdateProjectionVar)
 		self:NetworkVarNotify("FOV", self.UpdateProjectionVar)
+		self:NetworkVarNotify("ViewOffset", self.UpdateProjectionVar)
 	else
 		self.AssignedKey = {}
 	end
@@ -135,6 +145,7 @@ function ENT:Initialize()
 	-- defaults
 	self:SetProjectionColor(Vector(0, 1, 0))
 	self:SetProjectionBrightness(1)
+	self:SetViewOffset(Vector(0, 0, 0))
 
 	-- Tell the server that we are ready to receive the key of this camera
 	if CLIENT and IsValid(self) and self.AssignedKey.key == nil then

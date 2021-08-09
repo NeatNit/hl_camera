@@ -21,6 +21,8 @@ function ENT:UpdateProjectionVar(varchanged, oldvalue, newvalue)
 		self:UpdateProjectionColor(newvalue, self:GetProjectionBrightness())
 	elseif varchanged == "ProjectionBrightness" then
 		self:UpdateProjectionColor(self:GetProjectionColor(), newvalue)
+	elseif varchanged == "ViewOffset" then
+		self:UpdateProjectionOffset(newvalue)
 	end
 end
 
@@ -66,6 +68,11 @@ end
 function ENT:UpdateProjectionRoll(newroll)
 	if not IsValid(self.ptexture) then return end
 	self.ptexture:SetLocalAngles(Angle(0, 0, newroll))
+end
+
+function ENT:UpdateProjectionOffset(newoffset)
+	if not IsValid(self.ptexture) then return end
+	self.ptexture:SetLocalPos(newoffset)
 end
 
 function ENT:SwitchProjection(on)
