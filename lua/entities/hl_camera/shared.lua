@@ -145,7 +145,6 @@ function ENT:Initialize()
 	-- defaults
 	self:SetProjectionColor(Vector(0, 1, 0))
 	self:SetProjectionBrightness(1)
-	self:SetViewOffset(Vector(0, 0, 0))
 
 	-- Tell the server that we are ready to receive the key of this camera
 	if CLIENT and IsValid(self) and self.AssignedKey.key == nil then

@@ -26,6 +26,7 @@ function TOOL:LeftClick(tr)
 	camera:SetNearZ(self:GetClientNumber("nearz"))
 	camera:SetFarZ(self:GetClientNumber("farz"))
 	camera:SetRoll(self:GetClientNumber("roll"))
+	camera:SetViewOffset(Vector(0, 0, 0))
 
 	camera:SetPos(tr.StartPos)
 	camera:SetAngles(ply:EyeAngles())
