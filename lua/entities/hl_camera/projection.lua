@@ -21,6 +21,8 @@ function ENT:UpdateProjectionVar(varchanged, oldvalue, newvalue)
 		self:UpdateProjectionColor(newvalue, self:GetProjectionBrightness())
 	elseif varchanged == "ProjectionBrightness" then
 		self:UpdateProjectionColor(self:GetProjectionColor(), newvalue)
+	elseif varchanged == "ViewOffset" then
+		self:UpdateProjectionOffset(newvalue)
 	end
 end
 
@@ -68,6 +70,11 @@ function ENT:UpdateProjectionRoll(newroll)
 	self.ptexture:SetLocalAngles(Angle(0, 0, newroll))
 end
 
+function ENT:UpdateProjectionOffset(newoffset)
+	if not IsValid(self.ptexture) then return end
+	self.ptexture:SetLocalPos(newoffset)
+end
+
 function ENT:SwitchProjection(on)
 	if not on and IsValid(self.ptexture) then
 		-- Turning projection off
@@ -80,7 +87,7 @@ function ENT:SwitchProjection(on)
 		self.ptexture = ents.Create("env_projectedtexture")
 		self.ptexture:SetParent(self)
 		self:DeleteOnRemove(self.ptexture)
-		self.ptexture:SetLocalPos(Vector(0, 0, 0))
+		self.ptexture:SetLocalPos(self:GetViewOffset())
 		self.ptexture:SetKeyValue("enableshadows", 1)
 		self.ptexture:Spawn()
 
