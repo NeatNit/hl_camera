@@ -113,7 +113,7 @@ end
 
 function ENT:CalcView(ply, origin, angles, fov, znear, zfar)
 	local view = {
-		origin = self:GetPos() + (self:LocalToWorld(self:GetViewOffset()) - self:GetPos()), -- probably there must be a simpler way to get local coordinates
+		origin = self:LocalToWorld(self:GetViewOffset()),
 		angles = self:GetAngles() + Angle(0, 0, self:GetRoll()),
 		znear = self:GetNearZ() > 0 and self:GetNearZ() or znear,
 		zfar = self:GetFarZ() > 0 and self:GetFarZ() or zfar,
