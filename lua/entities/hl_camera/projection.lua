@@ -87,7 +87,7 @@ function ENT:SwitchProjection(on)
 		self.ptexture = ents.Create("env_projectedtexture")
 		self.ptexture:SetParent(self)
 		self:DeleteOnRemove(self.ptexture)
-		self.ptexture:SetLocalPos(Vector(0, 0, 0))
+		self.ptexture:SetLocalPos(self:GetViewOffset())
 		self.ptexture:SetKeyValue("enableshadows", 1)
 		self.ptexture:Spawn()
 
