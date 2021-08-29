@@ -6,7 +6,7 @@ include("shared.lua")
 include("projection.lua")
 
 util.AddNetworkString("hl_camera_key")
-
+util.AddNetworkString("hl_camera_ghost")
 local ENT = ENT	-- so we can use ENT within hooks and functions
 local dev = GetConVar("developer")
 DEFINE_BASECLASS(ENT.Base)
@@ -128,12 +128,55 @@ function ENT:SetPlayerKey(ply, key, toggle)
 	self:UpdatePlayer(ply)
 end
 
+function ENT:GhostCreate()
+	if IsValid(self.ACGhost) then
+		return
+	end
+	local ghost = ents.Create("prop_dynamic")
+
+	ghost:SetModel("models/dav0r/camera.mdl")
+    ghost:SetRenderMode(RENDERMODE_TRANSCOLOR)
+    ghost:SetCollisionGroup(COLLISION_GROUP_NONE)
+	ghost:SetColor(Color(255, 255, 255, 155))
+	ghost:DrawShadow(false)
+    ghost:SetNotSolid(true)
+    ghost:Spawn()
+	
+	ghost:SetParent(self)
+    ghost:SetLocalPos(self:GetViewOffset())
+    ghost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
+	
+	net.Start("hl_camera_ghost")
+		net.WriteEntity(self)
+		net.WriteEntity(ghost)
+	net.Send(self:GetCreator())
+
+	return ghost
+end
+
+function ENT:Think()
+	if !IsValid(self.ACGhost) and self:GetEnableGhost() then
+		self.ACGhost = self:GhostCreate() -- ents.Create is a serverside only function, so now i gotta pass over the entity info to the client.
+	elseif !self:GetEnableGhost() and IsValid(self.ACGhost) then
+		self.ACGhost:Remove()
+	end
+	
+	if IsValid(self.ACGhost) then
+		self.ACGhost:SetLocalPos(self:GetViewOffset())
+		self.ACGhost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
+	end
+end
+
 
 function ENT:OnRemove()
 	for _, ply in pairs(player.GetAll()) do
 		if ply:GetViewEntity() == self then
 			ply:SetViewEntity(nil)
 		end
+	end
+	
+	if IsValid(self.ACGhost) then
+		self.ACGhost:Remove()
 	end
 end
 
@@ -149,16 +192,17 @@ end
 
 function ENT:OnDuplicated(dupdata)
 	if dev:GetBool() then MsgN("OnDuplicated ", self) end
-
+	
+	self.ACGhost = nil
 	self.PlayerBinds = {}	-- don't actually want to inherit the player binds table
-
+	
 	self.DuplicatedBinds = dupdata.PlayerBinds -- this is for PostEntityPaste
 end
 
 
 function ENT:PostEntityPaste(ply)
 	if dev:GetBool() then MsgN("PostEntityPaste ", self, ply) end
-
+	
 	if IsValid(ply) then
 		local steamid = ply:SteamID()
 		if self.DuplicatedBinds[steamid] then

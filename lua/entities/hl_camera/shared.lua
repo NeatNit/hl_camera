@@ -21,12 +21,21 @@ function ENT:SetupDataTables()
 			type = "Generic"
 		}
 	})
+	
+	self:NetworkVar("Bool", 0, "EnableGhost", {
+		KeyName = "enableghost",
+		Edit = {
+			title = "#hl_camera.enableghost",
+			order = 1,
+			type = "Boolean"
+		}
+	})
 
 	self:NetworkVar("Float", 0, "FOV", {
 		KeyName = "fov",
 		Edit = {
 			title = "#hl_camera.fov",
-			order = 1,
+			order = 2,
 			type = "Float",
 			min = 0,
 			max = 179.99
@@ -37,7 +46,7 @@ function ENT:SetupDataTables()
 		KeyName = "nearz",
 		Edit = {
 			title = "#hl_camera.nearz",
-			order = 2,
+			order = 3,
 			type = "Float",
 			min = 0,
 			max = 1000000
@@ -48,7 +57,7 @@ function ENT:SetupDataTables()
 		KeyName = "farz",
 		Edit = {
 			title = "#hl_camera.farz",
-			order = 3,
+			order = 4,
 			type = "Float",
 			min = 0,
 			max = 1000000
@@ -59,18 +68,18 @@ function ENT:SetupDataTables()
 		KeyName = "roll",
 		Edit = {
 			title = "#hl_camera.roll",
-			order = 4,
+			order = 5,
 			type = "Float",
 			min = -180,
 			max = 180
 		}
 	})
 
-	self:NetworkVar("Bool", 0, "ProjectionOn", {
+	self:NetworkVar("Bool", 1, "ProjectionOn", {
 		KeyName = "projectionon",
 		Edit = {
 			title = "#hl_camera.projection.on",
-			order = 5,
+			order = 6,
 			category = "#hl_camera.projection.title",
 			type = "Boolean"
 		}
@@ -80,7 +89,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionratioid",
 		Edit = {
 			title = "#hl_camera.projection.ratio",
-			order = 6,
+			order = 7,
 			category = "#hl_camera.projection.title",
 			type = "Combo",
 			--text = "16:9",
@@ -92,7 +101,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectioncolor",
 		Edit = {
 			title = "#hl_camera.projection.color",
-			order = 7,
+			order = 8,
 			category = "#hl_camera.projection.title",
 			type = "VectorColor"
 		}
@@ -102,7 +111,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionbr",
 		Edit = {
 			title = "#hl_camera.projection.brightness",
-			order = 8,
+			order = 9,
 			category = "#hl_camera.projection.title",
 			type = "Float",
 			min = 0,
