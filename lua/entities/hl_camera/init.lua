@@ -135,17 +135,17 @@ function ENT:GhostCreate()
 	local ghost = ents.Create("prop_dynamic")
 
 	ghost:SetModel("models/dav0r/camera.mdl")
-    ghost:SetRenderMode(RENDERMODE_TRANSCOLOR)
-    ghost:SetCollisionGroup(COLLISION_GROUP_NONE)
+	ghost:SetRenderMode(RENDERMODE_TRANSCOLOR)
+	ghost:SetCollisionGroup(COLLISION_GROUP_NONE)
 	ghost:SetColor(Color(255, 255, 255, 155))
 	ghost:DrawShadow(false)
-    ghost:SetNotSolid(true)
-    ghost:Spawn()
-	
+	ghost:SetNotSolid(true)
+	ghost:Spawn()
+
 	ghost:SetParent(self)
-    ghost:SetLocalPos(self:GetViewOffset())
-    ghost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
-	
+	ghost:SetLocalPos(self:GetViewOffset())
+	ghost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
+
 	net.Start("hl_camera_ghost")
 		net.WriteEntity(self)
 		net.WriteEntity(ghost)
