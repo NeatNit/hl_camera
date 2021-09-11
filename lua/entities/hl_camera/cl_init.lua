@@ -16,12 +16,6 @@ net.Receive("hl_camera_key", function(len)
 	camera:UpdateText()
 end)
 
-net.Receive("hl_camera_ghost", function(len)
-	local camera = net.ReadEntity()
-	local ghost = net.ReadEntity()
-	camera.ACGhost = ghost
-end)
-
 function ENT:UpdateText()
 	local keyname = input.GetKeyName(self.AssignedKey.key)
 	self.AssignedKey.text = keyname and language.GetPhrase(keyname)
@@ -69,14 +63,6 @@ function ENT:Think()
 
 			trapping_camera = nil
 		end
-	end
-	
-	if !IsValid(self.ACGhost) then return end
-	
-	if CheckIfCanDraw() then
-		self.ACGhost:ManipulateBoneScale(0, Vector(1, 1, 1))
-	else
-		self.ACGhost:ManipulateBoneScale(0, Vector(0, 0, 0))
 	end
 end
 

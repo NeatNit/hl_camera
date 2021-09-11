@@ -132,31 +132,20 @@ function ENT:GhostCreate()
 	if IsValid(self.ACGhost) then
 		return
 	end
-	local ghost = ents.Create("prop_dynamic")
+	local ghost = ents.Create("hl_camera_ghost")
 
-	ghost:SetModel("models/dav0r/camera.mdl")
-	ghost:SetRenderMode(RENDERMODE_TRANSCOLOR)
-	ghost:SetCollisionGroup(COLLISION_GROUP_NONE)
-	ghost:SetColor(Color(255, 255, 255, 155))
-	ghost:DrawShadow(false)
-	ghost:SetNotSolid(true)
 	ghost:Spawn()
 
 	ghost:SetParent(self)
 	ghost:SetLocalPos(self:GetViewOffset())
 	ghost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
 
-	net.Start("hl_camera_ghost")
-		net.WriteEntity(self)
-		net.WriteEntity(ghost)
-	net.Send(self:GetCreator())
-
 	return ghost
 end
 
 function ENT:Think()
 	if !IsValid(self.ACGhost) and self:GetEnableGhost() then
-		self.ACGhost = self:GhostCreate() -- ents.Create is a serverside only function, so now i gotta pass over the entity info to the client.
+		self.ACGhost = self:GhostCreate()
 	elseif !self:GetEnableGhost() and IsValid(self.ACGhost) then
 		self.ACGhost:Remove()
 	end
