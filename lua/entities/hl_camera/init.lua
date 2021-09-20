@@ -7,6 +7,7 @@ include("projection.lua")
 
 util.AddNetworkString("hl_camera_key")
 util.AddNetworkString("hl_camera_ghost")
+
 local ENT = ENT	-- so we can use ENT within hooks and functions
 local dev = GetConVar("developer")
 DEFINE_BASECLASS(ENT.Base)
@@ -143,19 +144,40 @@ function ENT:GhostCreate()
 	return ghost
 end
 
-function ENT:Think()
-	if !IsValid(self.ACGhost) and self:GetEnableGhost() then
-		self.ACGhost = self:GhostCreate()
-	elseif !self:GetEnableGhost() and IsValid(self.ACGhost) then
-		self.ACGhost:Remove()
+function ENT:UpdateGhostVar(varchanged, oldvalue, newvalue)
+	if oldvalue == newvalue then return end
+
+	if varchanged == "EnableGhost" then
+		self:SetGhost(newvalue)
+	elseif varchanged == "ViewOffset" then
+		self:SetGhostOffset(newvalue, self:GetRoll(), self:GetEnableGhost())
+	elseif varchanged == "Roll" then
+		self:SetGhostOffset(self:GetViewOffset(), newvalue, self:GetEnableGhost())
 	end
-	
-	if IsValid(self.ACGhost) then
-		self.ACGhost:SetLocalPos(self:GetViewOffset())
-		self.ACGhost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
+
+end
+
+function ENT:SetGhost(enabled)
+	if !IsValid(self.ACGhost) and enabled then
+		self.ACGhost = self:GhostCreate()
+	elseif !enabled and IsValid(self.ACGhost) then
+		self.ACGhost:Remove()
 	end
 end
 
+function ENT:SetGhostOffset(offset, roll, enabled)
+	if offset == vector_origin then
+		if IsValid(self.ACGhost) then
+			self.ACGhost:Remove()
+		end
+	elseif enabled then
+		if !IsValid(self.ACGhost) then
+			self.ACGhost = self:GhostCreate()
+		end
+		self.ACGhost:SetLocalPos(offset)
+		self.ACGhost:SetLocalAngles(Angle(0, 0, roll))
+	end
+end
 
 function ENT:OnRemove()
 	for _, ply in pairs(player.GetAll()) do

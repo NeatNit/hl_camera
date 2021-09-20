@@ -140,6 +140,10 @@ function ENT:SetupDataTables()
 		self:NetworkVarNotify("Roll", self.UpdateProjectionVar)
 		self:NetworkVarNotify("FOV", self.UpdateProjectionVar)
 		self:NetworkVarNotify("ViewOffset", self.UpdateProjectionVar)
+		
+		self:NetworkVarNotify("EnableGhost", self.UpdateGhostVar)
+		self:NetworkVarNotify("ViewOffset", self.UpdateGhostVar)
+		self:NetworkVarNotify("Roll", self.UpdateGhostVar)
 	else
 		self.AssignedKey = {}
 	end

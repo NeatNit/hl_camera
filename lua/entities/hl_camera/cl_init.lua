@@ -31,7 +31,7 @@ function ENT:StartSetNewKey()
 	if not input.IsKeyTrapping() then input.StartKeyTrapping() end
 end
 
-local function CheckIfCanDraw()
+function ENT:ShouldDraw()
 	-- obey cl_drawcameras that is used in vanilla cameras
 	if not cvars.Bool("cl_drawcameras", true) then return false end
 
@@ -68,7 +68,7 @@ end
 
 function ENT:Draw()
 	
-	if not CheckIfCanDraw() then return end
+	if not self:ShouldDraw() then return end
 
 	-- in all other cases, draw
 	self:DrawModel()
