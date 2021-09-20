@@ -67,7 +67,6 @@ function ENT:Think()
 end
 
 function ENT:Draw()
-	
 	if not self:ShouldDraw() then return end
 
 	-- in all other cases, draw

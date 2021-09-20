@@ -156,16 +156,16 @@ end
 
 function ENT:OnDuplicated(dupdata)
 	if dev:GetBool() then MsgN("OnDuplicated ", self) end
-	
+
 	self.PlayerBinds = {}	-- don't actually want to inherit the player binds table
-	
+
 	self.DuplicatedBinds = dupdata.PlayerBinds -- this is for PostEntityPaste
 end
 
 
 function ENT:PostEntityPaste(ply)
 	if dev:GetBool() then MsgN("PostEntityPaste ", self, ply) end
-	
+
 	if IsValid(ply) then
 		local steamid = ply:SteamID()
 		if self.DuplicatedBinds[steamid] then
