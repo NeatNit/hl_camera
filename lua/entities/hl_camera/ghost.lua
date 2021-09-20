@@ -2,7 +2,7 @@ function ENT:GhostCreate()
 	if IsValid(self.ACGhost) then
 		return nil
 	end
-	
+
 	local ghost = ents.Create("hl_camera_ghost")
 
 	ghost:Spawn()
@@ -28,9 +28,9 @@ function ENT:UpdateGhostVar(varchanged, oldvalue, newvalue)
 end
 
 function ENT:SwitchGhost(on)
-	if !IsValid(self.ACGhost) and on and not (self:GetViewOffset() == vector_origin and self:GetRoll() == 0)  then
+	if not IsValid(self.ACGhost) and on and not (self:GetViewOffset() == vector_origin and self:GetRoll() == 0)  then
 		self.ACGhost = self:GhostCreate()
-	elseif !on and IsValid(self.ACGhost) then
+	elseif not on and IsValid(self.ACGhost) then
 		self.ACGhost:Remove()
 	end
 end
@@ -41,7 +41,7 @@ function ENT:UpdateGhostOffset(offset, roll, on)
 			self.ACGhost:Remove()
 		end
 	elseif on then
-		if !IsValid(self.ACGhost) then
+		if not IsValid(self.ACGhost) then
 			self.ACGhost = self:GhostCreate()
 		end
 		self.ACGhost:SetLocalPos(offset)

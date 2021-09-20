@@ -30,7 +30,7 @@ function ENT:SetupDataTables()
 			type = "Generic"
 		}
 	})
-	
+
 	self:NetworkVar("Bool", 0, "EnableGhost", {
 		KeyName = "enableghost",
 		Edit = {
@@ -140,7 +140,7 @@ function ENT:SetupDataTables()
 		self:NetworkVarNotify("Roll", self.UpdateProjectionVar)
 		self:NetworkVarNotify("FOV", self.UpdateProjectionVar)
 		self:NetworkVarNotify("ViewOffset", self.UpdateProjectionVar)
-		
+
 		self:NetworkVarNotify("EnableGhost", self.UpdateGhostVar)
 		self:NetworkVarNotify("ViewOffset", self.UpdateGhostVar)
 		self:NetworkVarNotify("Roll", self.UpdateGhostVar)
