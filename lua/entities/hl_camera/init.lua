@@ -3,6 +3,7 @@ AddCSLuaFile("cl_properties.lua")
 resource.AddWorkshop("881605937")
 
 include("shared.lua")
+include("ghost.lua")
 include("projection.lua")
 
 util.AddNetworkString("hl_camera_key")
@@ -129,65 +130,11 @@ function ENT:SetPlayerKey(ply, key, toggle)
 	self:UpdatePlayer(ply)
 end
 
-function ENT:GhostCreate()
-	if IsValid(self.ACGhost) then
-		return
-	end
-	local ghost = ents.Create("hl_camera_ghost")
-
-	ghost:Spawn()
-
-	ghost:SetParent(self)
-	ghost:SetLocalPos(self:GetViewOffset())
-	ghost:SetLocalAngles(Angle(0, 0, self:GetRoll()))
-
-	return ghost
-end
-
-function ENT:UpdateGhostVar(varchanged, oldvalue, newvalue)
-	if oldvalue == newvalue then return end
-
-	if varchanged == "EnableGhost" then
-		self:SetGhost(newvalue)
-	elseif varchanged == "ViewOffset" then
-		self:SetGhostOffset(newvalue, self:GetRoll(), self:GetEnableGhost())
-	elseif varchanged == "Roll" then
-		self:SetGhostOffset(self:GetViewOffset(), newvalue, self:GetEnableGhost())
-	end
-
-end
-
-function ENT:SetGhost(enabled)
-	if !IsValid(self.ACGhost) and enabled then
-		self.ACGhost = self:GhostCreate()
-	elseif !enabled and IsValid(self.ACGhost) then
-		self.ACGhost:Remove()
-	end
-end
-
-function ENT:SetGhostOffset(offset, roll, enabled)
-	if offset == vector_origin then
-		if IsValid(self.ACGhost) then
-			self.ACGhost:Remove()
-		end
-	elseif enabled then
-		if !IsValid(self.ACGhost) then
-			self.ACGhost = self:GhostCreate()
-		end
-		self.ACGhost:SetLocalPos(offset)
-		self.ACGhost:SetLocalAngles(Angle(0, 0, roll))
-	end
-end
-
 function ENT:OnRemove()
 	for _, ply in pairs(player.GetAll()) do
 		if ply:GetViewEntity() == self then
 			ply:SetViewEntity(nil)
 		end
-	end
-	
-	if IsValid(self.ACGhost) then
-		self.ACGhost:Remove()
 	end
 end
 
@@ -200,11 +147,16 @@ function ENT:PhysicsUpdate(phys)
 	end
 end
 
+function ENT:OnEntityCopyTableFinish(dupdata) -- Override the dupe data so it won't grab existing entities, it'll create new ones anyway
+
+	dupdata.ACGhost = nil
+	dupdata.ptexture = nil
+
+end
 
 function ENT:OnDuplicated(dupdata)
 	if dev:GetBool() then MsgN("OnDuplicated ", self) end
 	
-	self.ACGhost = nil
 	self.PlayerBinds = {}	-- don't actually want to inherit the player binds table
 	
 	self.DuplicatedBinds = dupdata.PlayerBinds -- this is for PostEntityPaste
