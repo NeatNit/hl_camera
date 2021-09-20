@@ -20,9 +20,9 @@ function ENT:UpdateGhostVar(varchanged, oldvalue, newvalue)
 	if varchanged == "EnableGhost" then
 		self:SwitchGhost(newvalue)
 	elseif varchanged == "ViewOffset" then
-		self:SetGhostOffset(newvalue, self:GetRoll(), self:GetEnableGhost())
+		self:UpdateGhostOffset(newvalue, self:GetRoll(), self:GetEnableGhost())
 	elseif varchanged == "Roll" then
-		self:SetGhostOffset(self:GetViewOffset(), newvalue, self:GetEnableGhost())
+		self:UpdateGhostOffset(self:GetViewOffset(), newvalue, self:GetEnableGhost())
 	end
 
 end
@@ -35,7 +35,7 @@ function ENT:SwitchGhost(on)
 	end
 end
 
-function ENT:SetGhostOffset(offset, roll, on)
+function ENT:UpdateGhostOffset(offset, roll, on)
 	if offset == vector_origin and roll == 0 then
 		if IsValid(self.ACGhost) then
 			self.ACGhost:Remove()
