@@ -1,6 +1,7 @@
 function ENT:GhostCreate()
 	if IsValid(self.ACGhost) then
-		return nil
+		-- this should never happen, but to be on the safe side:
+		return self.ACGhost
 	end
 
 	local ghost = ents.Create("hl_camera_ghost")
