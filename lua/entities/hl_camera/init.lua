@@ -3,9 +3,11 @@ AddCSLuaFile("cl_properties.lua")
 resource.AddWorkshop("881605937")
 
 include("shared.lua")
+include("ghost.lua")
 include("projection.lua")
 
 util.AddNetworkString("hl_camera_key")
+util.AddNetworkString("hl_camera_ghost")
 
 local ENT = ENT	-- so we can use ENT within hooks and functions
 local dev = GetConVar("developer")
@@ -128,7 +130,6 @@ function ENT:SetPlayerKey(ply, key, toggle)
 	self:UpdatePlayer(ply)
 end
 
-
 function ENT:OnRemove()
 	for _, ply in pairs(player.GetAll()) do
 		if ply:GetViewEntity() == self then
@@ -146,6 +147,12 @@ function ENT:PhysicsUpdate(phys)
 	end
 end
 
+function ENT:OnEntityCopyTableFinish(dupdata) -- Override the dupe data so it won't grab existing entities, it'll create new ones anyway
+
+	dupdata.ACGhost = nil
+	dupdata.ptexture = nil
+
+end
 
 function ENT:OnDuplicated(dupdata)
 	if dev:GetBool() then MsgN("OnDuplicated ", self) end

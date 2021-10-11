@@ -31,6 +31,20 @@ function ENT:StartSetNewKey()
 	if not input.IsKeyTrapping() then input.StartKeyTrapping() end
 end
 
+function ENT:ShouldDraw()
+	-- obey cl_drawcameras that is used in vanilla cameras
+	if not cvars.Bool("cl_drawcameras", true) then return false end
+
+	-- don't draw cameras while looking through another camera
+	if GetViewEntity():GetClass() == ENT.ClassName then return false end
+
+	-- don't draw cameras while using the camera swep
+	local wep = LocalPlayer():GetActiveWeapon()
+	if IsValid(wep) and wep:GetClass() == "gmod_camera" then return false end
+
+	return true
+end
+
 function ENT:Think()
 	if trapping_camera == self and input.IsKeyTrapping() then
 		local key = input.CheckKeyTrapping()
@@ -53,15 +67,7 @@ function ENT:Think()
 end
 
 function ENT:Draw()
-	-- obey cl_drawcameras that is used in vanilla cameras
-	if not cvars.Bool("cl_drawcameras", true) then return end
-
-	-- don't draw cameras while looking through another camera
-	if GetViewEntity():GetClass() == ENT.ClassName then return end
-
-	-- don't draw cameras while using the camera swep
-	local wep = LocalPlayer():GetActiveWeapon()
-	if IsValid(wep) and wep:GetClass() == "gmod_camera" then return end
+	if not self:ShouldDraw() then return end
 
 	-- in all other cases, draw
 	self:DrawModel()

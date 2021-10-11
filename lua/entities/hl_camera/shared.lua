@@ -13,12 +13,30 @@ DEFINE_BASECLASS(ENT.Base)
 ENT.RenderGroup = RENDERGROUP_BOTH
 
 function ENT:SetupDataTables()
+
+	-- Automatic order support code
+	local current_order = 0;
+	local function next_order()
+		local ret = current_order;
+		current_order = current_order + 1;
+		return ret;
+	end
+
 	self:NetworkVar("Vector", 0, "ViewOffset", {
 		KeyName = "viewoffset",
 		Edit = {
 			title = "#hl_camera.viewoffset",
-			order = 0,
+			order = next_order(),
 			type = "Generic"
+		}
+	})
+
+	self:NetworkVar("Bool", 0, "EnableGhost", {
+		KeyName = "enableghost",
+		Edit = {
+			title = "#hl_camera.enableghost",
+			order = next_order(),
+			type = "Boolean"
 		}
 	})
 
@@ -26,7 +44,7 @@ function ENT:SetupDataTables()
 		KeyName = "fov",
 		Edit = {
 			title = "#hl_camera.fov",
-			order = 1,
+			order = next_order(),
 			type = "Float",
 			min = 0,
 			max = 179.99
@@ -37,7 +55,7 @@ function ENT:SetupDataTables()
 		KeyName = "nearz",
 		Edit = {
 			title = "#hl_camera.nearz",
-			order = 2,
+			order = next_order(),
 			type = "Float",
 			min = 0,
 			max = 1000000
@@ -48,7 +66,7 @@ function ENT:SetupDataTables()
 		KeyName = "farz",
 		Edit = {
 			title = "#hl_camera.farz",
-			order = 3,
+			order = next_order(),
 			type = "Float",
 			min = 0,
 			max = 1000000
@@ -59,18 +77,18 @@ function ENT:SetupDataTables()
 		KeyName = "roll",
 		Edit = {
 			title = "#hl_camera.roll",
-			order = 4,
+			order = next_order(),
 			type = "Float",
 			min = -180,
 			max = 180
 		}
 	})
 
-	self:NetworkVar("Bool", 0, "ProjectionOn", {
+	self:NetworkVar("Bool", 1, "ProjectionOn", {
 		KeyName = "projectionon",
 		Edit = {
 			title = "#hl_camera.projection.on",
-			order = 5,
+			order = next_order(),
 			category = "#hl_camera.projection.title",
 			type = "Boolean"
 		}
@@ -80,7 +98,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionratioid",
 		Edit = {
 			title = "#hl_camera.projection.ratio",
-			order = 6,
+			order = next_order(),
 			category = "#hl_camera.projection.title",
 			type = "Combo",
 			--text = "16:9",
@@ -92,7 +110,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectioncolor",
 		Edit = {
 			title = "#hl_camera.projection.color",
-			order = 7,
+			order = next_order(),
 			category = "#hl_camera.projection.title",
 			type = "VectorColor"
 		}
@@ -102,7 +120,7 @@ function ENT:SetupDataTables()
 		KeyName = "projectionbr",
 		Edit = {
 			title = "#hl_camera.projection.brightness",
-			order = 8,
+			order = next_order(),
 			category = "#hl_camera.projection.title",
 			type = "Float",
 			min = 0,
@@ -122,6 +140,10 @@ function ENT:SetupDataTables()
 		self:NetworkVarNotify("Roll", self.UpdateProjectionVar)
 		self:NetworkVarNotify("FOV", self.UpdateProjectionVar)
 		self:NetworkVarNotify("ViewOffset", self.UpdateProjectionVar)
+
+		self:NetworkVarNotify("EnableGhost", self.UpdateGhostVar)
+		self:NetworkVarNotify("ViewOffset", self.UpdateGhostVar)
+		self:NetworkVarNotify("Roll", self.UpdateGhostVar)
 	else
 		self.AssignedKey = {}
 	end
